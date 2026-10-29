@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Nitros Bike - Sistema OS</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff0000">
     <!-- HTML2Canvas para gerar a imagem digital -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -183,7 +185,7 @@
 
                 <div class="form-group">
                     <label>Telefone</label>
-                    <input type="text" id="f-fone" placeholder="(21) 90000-0000">
+                    <input type="text" id="f-fone" placeholder="(21) 90000-0000" maxlength="15" inputmode="numeric" oninput="this.value = mascaraTelefone(this.value)">
                 </div>
                 
                 <div class="form-group">
@@ -194,11 +196,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Data de Entrega</label>
-                        <input type="text" id="f-entrega" placeholder="DD-MM-YYYY">
+                        <input type="text" id="f-entrega" placeholder="DD-MM-YYYY" maxlength="10" inputmode="numeric" oninput="this.value = mascaraData(this.value)">
                     </div>
                     <div class="form-group">
                         <label>Valor do Serviço (R$)</label>
-                        <input type="text" id="f-valor" placeholder="Ex: 150,00">
+                        <input type="text" id="f-valor" placeholder="0,00" inputmode="decimal" oninput="this.value = mascaraValor(this.value)">
                     </div>
                 </div>
                 
@@ -239,7 +241,33 @@
     <script>
         // Inicialização e Numeração Automática da OS
         const storageKey = 'nitros_bike_os_counter';
-        
+
+        // ===== MÁSCARAS DE FORMATAÇÃO =====
+        function mascaraTelefone(valor) {
+            valor = valor.replace(/\D/g, '').slice(0, 11);
+            if (valor.length <= 2) return valor.length ? '(' + valor : '';
+            if (valor.length <= 7) return '(' + valor.slice(0, 2) + ') ' + valor.slice(2);
+            return '(' + valor.slice(0, 2) + ') ' + valor.slice(2, 7) + '-' + valor.slice(7);
+        }
+
+        function mascaraData(valor) {
+            valor = valor.replace(/\D/g, '').slice(0, 8);
+            if (valor.length <= 2) return valor;
+            if (valor.length <= 4) return valor.slice(0, 2) + '-' + valor.slice(2);
+            return valor.slice(0, 2) + '-' + valor.slice(2, 4) + '-' + valor.slice(4);
+        }
+
+        function mascaraValor(valor) {
+            // Remove tudo que não é dígito
+            valor = valor.replace(/\D/g, '');
+            if (!valor) return '';
+            // Converte para centavos → formato brasileiro (1.234,56)
+            const num = (parseInt(valor, 10) / 100).toFixed(2);
+            const parts = num.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return parts[0] + ',' + parts[1];
+        }
+
         function initOS() {
             let num = localStorage.getItem(storageKey);
             if (!num) {
@@ -319,6 +347,11 @@
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
+        }
+
+        // Service Worker (permite instalar como app + uso offline)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
         }
 
         // Inicializa ao carregar a página
