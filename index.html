@@ -275,13 +275,8 @@
                 localStorage.setItem(storageKey, num);
             }
             document.getElementById('f-os').value = num;
-            
-            // Preencher data de entrega sugerida como a data de hoje formatada
-            const hoje = new Date();
-            const dia = String(hoje.getDate()).padStart(2, '0');
-            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-            const ano = hoje.getFullYear();
-            document.getElementById('f-entrega').value = `${dia}-${mes}-${ano}`;
+            // Data de entrega começa vazia (usuário preenche)
+            document.getElementById('f-entrega').value = '';
         }
 
         function gerarOS() {
@@ -297,7 +292,12 @@
             const valor = document.getElementById('f-valor').value || '0,00';
             
             const hojeData = new Date();
-            const hojeStr = `${String(hojeData.getDate()).padStart(2, '0')}/${String(hojeData.getMonth()+1).padStart(2, '0')}/${hojeData.getFullYear()}`;
+            const dia = String(hojeData.getDate()).padStart(2, '0');
+            const mes = String(hojeData.getMonth() + 1).padStart(2, '0');
+            const ano = hojeData.getFullYear();
+            const hora = String(hojeData.getHours()).padStart(2, '0');
+            const min = String(hojeData.getMinutes()).padStart(2, '0');
+            const hojeStr = `${dia}/${mes}/${ano} ${hora}:${min}`;
 
             // Preencher campos no cupom (IDs iguais ao original)
             document.getElementById('v-numero').innerText = '#' + os;
